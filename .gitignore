@@ -1,0 +1,22 @@
+# Variables de entorno
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# n8n
+n8n/.n8n/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.override.yml
