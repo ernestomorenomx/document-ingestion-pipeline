@@ -20,3 +20,30 @@ Thumbs.db
 
 # Docker
 *.override.yml
+
+# Secrets
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+
+# Vault and real documents (never in Git)
+BRAIN_EMT/
+90_INGESTA/
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+*.png
+*.jpg
+*.jpeg
+*.mp3
+*.mp4
+!tests/fixtures/synthetic/**
+
+# Backups and databases
+*.dump
+*.sql.gz
+*.sqlite
+backup/
