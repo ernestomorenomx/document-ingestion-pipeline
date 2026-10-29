@@ -1,0 +1,180 @@
+{
+  "rules_version": "DN-004 v1",
+  "stability_window_seconds": 60,
+  "allowed_extensions": [
+    "pdf",
+    "docx",
+    "epub"
+  ],
+  "scenarios": {
+    "mixed": {
+      "items": [
+        {
+          "name": ".DS_Store",
+          "size": 8,
+          "age_seconds": 3600,
+          "sha256": "c60d20d511de9eb88cd842833d175fc7cb79c6fe54fb4f3f4265b144ec39e7a6",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "HIDDEN"
+          }
+        },
+        {
+          "name": "UPPERCASE_REPORT.PDF",
+          "size": 224,
+          "age_seconds": 3600,
+          "sha256": "cb6451f8f48b0dc489a951474aa084cd1aa37a25e7a32ee7909353d67668e46e",
+          "expected": {
+            "decision": "ACCEPT",
+            "reason": null
+          }
+        },
+        {
+          "name": "corrupt.pdf",
+          "size": 41,
+          "age_seconds": 3600,
+          "sha256": "d0ff09e314cf112ec1fa0199030da9bc408267e4c3fd333c1207b899908b74cf",
+          "expected": {
+            "decision": "ACCEPT",
+            "reason": null
+          }
+        },
+        {
+          "name": "data.bin",
+          "size": 3,
+          "age_seconds": 3600,
+          "sha256": "ae4b3280e56e2faf83f414a6e3dabe9d5fbe18976544c05fed121accb85b53fc",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "UNSUPPORTED_EXT"
+          }
+        },
+        {
+          "name": "download.pdf.crdownload",
+          "size": 7,
+          "age_seconds": 3600,
+          "sha256": "9834a14ab9bcaa0f6a8da71073617eac8f004e596a3fa11d807b84631b825d9d",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "TEMP_EXT"
+          }
+        },
+        {
+          "name": "empty.pdf",
+          "size": 0,
+          "age_seconds": 3600,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "EMPTY"
+          }
+        },
+        {
+          "name": "fresh_upload.pdf",
+          "size": 220,
+          "age_seconds": 5,
+          "sha256": "f4ea7019d5f5f2f9e7812ae8eec2967fccc50ee89aea1f260653c36d7a71cc28",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "UNSTABLE"
+          }
+        },
+        {
+          "name": "incoming.download",
+          "size": 7,
+          "age_seconds": 3600,
+          "sha256": "9834a14ab9bcaa0f6a8da71073617eac8f004e596a3fa11d807b84631b825d9d",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "TEMP_EXT"
+          }
+        },
+        {
+          "name": "no_extension",
+          "size": 5,
+          "age_seconds": 3600,
+          "sha256": "a116c9ed46d6207734a43317d30fd88f52ac8634c37d904bbf4e41d865f90475",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "UNSUPPORTED_EXT"
+          }
+        },
+        {
+          "name": "partial.pdf.part",
+          "size": 7,
+          "age_seconds": 3600,
+          "sha256": "9834a14ab9bcaa0f6a8da71073617eac8f004e596a3fa11d807b84631b825d9d",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "TEMP_EXT"
+          }
+        },
+        {
+          "name": "scratch.tmp",
+          "size": 7,
+          "age_seconds": 3600,
+          "sha256": "5a9cb6b54ea56d52a69891af8c21afb73d3841611bbabb5d7c61312d81e6e041",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "TEMP_EXT"
+          }
+        },
+        {
+          "name": "valid_book.epub",
+          "size": 254,
+          "age_seconds": 3600,
+          "sha256": "23eb559789a696bcf9aa6f5b0f207f67a84fdbb75fb551a58223b0cd56ba3d78",
+          "expected": {
+            "decision": "ACCEPT",
+            "reason": null
+          }
+        },
+        {
+          "name": "valid_letter.docx",
+          "size": 267,
+          "age_seconds": 3600,
+          "sha256": "0f3fc5cd8b8aa9b745a54820fba481315022f4025d5b4e679ce4bdb0136e3c2d",
+          "expected": {
+            "decision": "ACCEPT",
+            "reason": null
+          }
+        },
+        {
+          "name": "valid_report.pdf",
+          "size": 220,
+          "age_seconds": 3600,
+          "sha256": "dfd745ea7672937b3c6cbcfcf359d470dad5582ae85a577d9f05d70ff48d9538",
+          "expected": {
+            "decision": "ACCEPT",
+            "reason": null
+          }
+        },
+        {
+          "name": "valid_report.pdf.procesando",
+          "size": 0,
+          "age_seconds": 3600,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "MARKER"
+          }
+        },
+        {
+          "name": "~$valid_letter.docx",
+          "size": 162,
+          "age_seconds": 3600,
+          "sha256": "ff8816394a9b859d664df85beeb2cd9a8218aaf12df07f380bab6b2b0bab116f",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "OFFICE_LOCK"
+          }
+        }
+      ]
+    },
+    "empty_folder": {
+      "items": [],
+      "expected_accepted": 0,
+      "expected_error": false
+    }
+  }
+}

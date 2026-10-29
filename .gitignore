@@ -47,3 +47,4 @@ BRAIN_EMT/
 *.sql.gz
 *.sqlite
 backup/
+tests/fixtures/synthetic/gate/generated/
