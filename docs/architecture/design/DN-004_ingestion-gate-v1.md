@@ -22,7 +22,7 @@ Production evidence showed that one Office lock file (`~$*.docx`) made the MarkI
 
 Upstream listing (one line per regular file, top level of the input folder only):
 
-    find <input_dir> -maxdepth 1 -type f -printf '%f\t%s\t%T@\t%C@\n'
+    LC_ALL=C.UTF-8 find <input_dir> -maxdepth 1 -type f ! -name '*[[:cntrl:]]*' -printf '%f\t%s\t%T@\t%C@\n'
 
 Fields: name, size in bytes, mtime and ctime in epoch seconds. Known limitation: a file name containing a newline breaks the line format.
 
@@ -35,16 +35,25 @@ Evaluated in this order; the first match rejects the file and sets the reason co
 | # | Reason code | Rule |
 | --- | --- | --- |
 | 1 | HIDDEN | name starts with `.` |
-| 2 | OFFICE_LOCK | name starts with `~$` |
-| 3 | MARKER | name ends with `.procesando` |
-| 4 | TEMP_EXT | extension (case-insensitive) is `tmp`, `part`, `crdownload` or `download` |
-| 5 | EMPTY | size is 0 bytes |
-| 6 | UNSUPPORTED_EXT | extension not in the allowed list |
-| 7 | UNSTABLE | now minus max(mtime, ctime) is below the stability window (default 60 s) |
+| 2 | UNSAFE_NAME | name contains a single quote, a backslash or a control character |
+| 3 | OFFICE_LOCK | name starts with `~$` |
+| 4 | MARKER | name ends with `.procesando` |
+| 5 | TEMP_EXT | extension (case-insensitive) is `tmp`, `part`, `crdownload` or `download` |
+| 6 | EMPTY | size is 0 bytes |
+| 7 | UNSUPPORTED_EXT | extension not in the allowed list |
+| 8 | UNSTABLE | now minus max(mtime, ctime) is below the stability window (default 60 s) |
 
 Allowed list v1: `pdf`, `docx`, `epub`. These are the only originals observed in the real input and archive folders. The list is a configuration constant at the top of the node. Extending it (for example xlsx or images) requires checking what MarkItDown supports first, and is an open item.
 
 Rejected files stay where they are. The gate never moves, renames or deletes anything (D7).
+
+## Unsafe file names (BV-F-019)
+
+The workflow interpolates file names inside single quotes in shell commands (hash and marker steps), so a name with a quote breaks the command and could run arbitrary commands on the host. Rule 2 rejects such names before any command sees them. Names with control characters (newline, tab) are excluded by the listing command itself, because they would break the line format; they stay in the folder untouched and are not reported in v1. The gate emits only the `fileName` field, which is the only one the next node reads.
+
+## Locale
+
+The listing command pins `LC_ALL=C.UTF-8`. Under the plain `C` locale, `find` prints every non-ASCII character as `?` (observed with an accented test name), so the hash step would receive a name that does not exist and the batch would abort.
 
 ## Out of scope for v1
 
@@ -60,6 +69,7 @@ Rejected files stay where they are. The gate never moves, renames or deletes any
 
 ## Open items
 
+- File names with bytes that are not valid UTF-8 are also printed with `?` by `find`. Decide whether the gate should reject names containing `?`.
 - Allowed extension list beyond pdf, docx and epub.
 - Stability window value (60 s is a starting point).
 - Confirm in n8n that downstream nodes end in `success` with zero input items.
