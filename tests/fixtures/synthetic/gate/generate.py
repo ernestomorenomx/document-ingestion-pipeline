@@ -49,6 +49,8 @@ CASES = [
     ("corrupt.pdf", b"not a real pdf, passes the gate by design", 3600, "ACCEPT", None),
     (".DS_Store", b"\x00\x00\x00\x01Bud1", 3600, "REJECT", "HIDDEN"),
     ("~$valid_letter.docx", OFFICE_LOCK, 3600, "REJECT", "OFFICE_LOCK"),
+    ("it's_quoted.pdf", pdf("quote"), 3600, "REJECT", "UNSAFE_NAME"),
+    ("back\\slash.pdf", pdf("backslash"), 3600, "REJECT", "UNSAFE_NAME"),
     ("valid_report.pdf.procesando", b"", 3600, "REJECT", "MARKER"),
     ("download.pdf.crdownload", b"partial", 3600, "REJECT", "TEMP_EXT"),
     ("partial.pdf.part", b"partial", 3600, "REJECT", "TEMP_EXT"),

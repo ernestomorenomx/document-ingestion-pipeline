@@ -30,6 +30,16 @@
           }
         },
         {
+          "name": "back\\slash.pdf",
+          "size": 224,
+          "age_seconds": 3600,
+          "sha256": "78919e39291d7681e74036826bfc7684ac970a2407cd0d4cdb1ceeb3e462c8c5",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "UNSAFE_NAME"
+          }
+        },
+        {
           "name": "corrupt.pdf",
           "size": 41,
           "age_seconds": 3600,
@@ -87,6 +97,16 @@
           "expected": {
             "decision": "REJECT",
             "reason": "TEMP_EXT"
+          }
+        },
+        {
+          "name": "it's_quoted.pdf",
+          "size": 220,
+          "age_seconds": 3600,
+          "sha256": "e6f136e9e867a6ba30f11e4f484addf0e3796935227a75cd34b6b01ba4621b47",
+          "expected": {
+            "decision": "REJECT",
+            "reason": "UNSAFE_NAME"
           }
         },
         {

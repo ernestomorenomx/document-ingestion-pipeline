@@ -17,6 +17,7 @@ function decide(file, nowSec, cfg) {
   const name = file.name;
   const ext = extensionOf(name);
   if (name.startsWith('.')) return 'HIDDEN';
+  if (/['\\\x00-\x1f\x7f]/.test(name)) return 'UNSAFE_NAME';
   if (name.startsWith('~$')) return 'OFFICE_LOCK';
   if (name.endsWith('.procesando')) return 'MARKER';
   if (cfg.tempExtensions.includes(ext)) return 'TEMP_EXT';
@@ -59,5 +60,5 @@ if (typeof $input !== 'undefined') {
   const counts = {};
   for (const r of rejected) counts[r.reason] = (counts[r.reason] || 0) + 1;
   console.log(`gate: accepted=${accepted.length} rejected=${JSON.stringify(counts)}`);
-  return accepted.map((f) => ({ json: { fileName: f.name, filename: f.name, size: f.size } }));
+  return accepted.map((f) => ({ json: { fileName: f.name } }));
 }
