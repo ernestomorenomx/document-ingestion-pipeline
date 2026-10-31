@@ -1,0 +1,10 @@
+# CR-003: Ingestion Gate v1 deployed in the ingest workflow
+
+- Date: 2026-10-30
+- Findings addressed: BV-F-001, BV-F-018, BV-F-019
+- Approved by: owner, in the working session (no pull request or issue link yet)
+- Backup taken (required): A full export of the live workflow with a recorded checksum, kept outside the repository. Exports of every workflow in the instance were taken afterwards, once the swap was done. The old workflow was kept intact and only deactivated.
+- Change: Created an inactive copy of the ingest workflow in which the file-read node is replaced by a listing command (UTF-8 locale, control-character names skipped) followed by a Code node holding n8n/gate/gate.js, then deactivated the old workflow and activated the copy, in that order, so the two never ran together. The public API refused the binary-handling setting on creation, so the copy runs with the default for it.
+- Rollback: Deactivate the copy and reactivate the old workflow, which is unchanged. The pre-change export above is the reference copy of the old workflow.
+- Verification (required): After the swap, four consecutive scheduled runs at two-minute intervals ended in success, and the old workflow did not run again. The detail of one run shows the listing node returning output, the gate returning 0 items and no later node executing. Then a synthetic lock-style file and a synthetic file with a single quote in its name were left in the input folder for four more scheduled runs: all ended in success, no processing marker was created, the document count did not change and both files stayed untouched. The owner removed them afterwards.
+- Residual risk: The default binary-handling setting of the copy is unverified, and the path with a valid file has not run in the new workflow. The reason for each rejection was not observed, only the outcome. File names with invalid UTF-8 bytes are not rejected by name. The gate code now lives in n8n's database, which is not backed up beyond workflow exports (BV-F-017). BV-F-003, BV-F-004 and BV-F-005 remain open.
