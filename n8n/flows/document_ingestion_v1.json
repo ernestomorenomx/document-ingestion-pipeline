@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "/brainvault/BRAIN_EMT/90_INGESTA/_entrada/*",
+        "fileSelector": "<CONTAINER_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/*",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
@@ -54,7 +54,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "postgres": {
-          "id": "ROX3JHxB01goK7lz",
+          "id": "<CREDENTIAL_ID>",
           "name": "Postgres account"
         }
       }
@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "command": "=sha256sum '/data/syncthing/brainvault/BRAIN_EMT/90_INGESTA/_entrada/{{ $json.fileName }}'"
+        "command": "=sha256sum '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $json.fileName }}'"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -107,7 +107,7 @@
       "name": "Execute a command",
       "credentials": {
         "sshPassword": {
-          "id": "xyQzrsCHdq5IpVEX",
+          "id": "<CREDENTIAL_ID>",
           "name": "SSH Password account"
         }
       }
@@ -172,7 +172,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "={{ '/brainvault/BRAIN_EMT/90_INGESTA/_entrada/' + $('Edit Fields').item.json.filename }}",
+        "fileSelector": "={{ '<CONTAINER_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/' + $('Edit Fields').item.json.filename }}",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
@@ -238,7 +238,7 @@
       "name": "Execute a SQL query1",
       "credentials": {
         "postgres": {
-          "id": "ROX3JHxB01goK7lz",
+          "id": "<CREDENTIAL_ID>",
           "name": "Postgres account"
         }
       }
@@ -279,7 +279,7 @@
     },
     {
       "parameters": {
-        "command": "=/usr/local/bin/brainvault-ocr.sh '/data/syncthing/brainvault/BRAIN_EMT/90_INGESTA/_entrada/{{ $('Edit Fields').item.json.filename }}'"
+        "command": "=/usr/local/bin/brainvault-ocr.sh '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $('Edit Fields').item.json.filename }}'"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -291,7 +291,7 @@
       "name": "Execute a command1",
       "credentials": {
         "sshPassword": {
-          "id": "xyQzrsCHdq5IpVEX",
+          "id": "<CREDENTIAL_ID>",
           "name": "SSH Password account"
         }
       }
@@ -325,7 +325,7 @@
     {
       "parameters": {
         "operation": "write",
-        "fileName": "=/brainvault/BRAIN_EMT/90_INGESTA/_procesados/{{ $json.filename }}",
+        "fileName": "=<CONTAINER_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_procesados/{{ $json.filename }}",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
@@ -339,7 +339,7 @@
     },
     {
       "parameters": {
-        "command": "=mv '/data/syncthing/brainvault/BRAIN_EMT/90_INGESTA/_entrada/{{ $('Code in JavaScript3').item.json.original_filename }}' '/data/syncthing/brainvault/BRAIN_EMT/90_INGESTA/_archivo/{{ $('Code in JavaScript3').item.json.original_filename }}' && rm -f '/data/syncthing/brainvault/BRAIN_EMT/90_INGESTA/_entrada/{{ $('Code in JavaScript3').item.json.original_filename }}.procesando'"
+        "command": "=mv '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $('Code in JavaScript3').item.json.original_filename }}' '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_archivo/{{ $('Code in JavaScript3').item.json.original_filename }}' && rm -f '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $('Code in JavaScript3').item.json.original_filename }}.procesando'"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -351,14 +351,14 @@
       "name": "Execute a command2",
       "credentials": {
         "sshPassword": {
-          "id": "xyQzrsCHdq5IpVEX",
+          "id": "<CREDENTIAL_ID>",
           "name": "SSH Password account"
         }
       }
     },
     {
       "parameters": {
-        "command": "=touch '/data/syncthing/brainvault/BRAIN_EMT/90_INGESTA/_entrada/{{ $json.filename }}.procesando'"
+        "command": "=touch '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $json.filename }}.procesando'"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -370,13 +370,12 @@
       "name": "Marcar como procesando",
       "credentials": {
         "sshPassword": {
-          "id": "xyQzrsCHdq5IpVEX",
+          "id": "<CREDENTIAL_ID>",
           "name": "SSH Password account"
         }
       }
     }
   ],
-  "pinData": {},
   "connections": {
     "Schedule Trigger": {
       "main": [
@@ -573,18 +572,9 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
-  },
-  "versionId": "8f646a29-1064-40bc-adce-b19ff02c5eb6",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "dcd9f6c07bb98a335d0c386954ed8ac526b1d95dd9007ef8daa8cd98651dd306"
-  },
-  "nodeGroups": [],
-  "id": "nZwyvOfqYrtYOZgZ",
-  "tags": []
+  }
 }

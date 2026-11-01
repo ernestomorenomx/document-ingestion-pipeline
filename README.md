@@ -22,7 +22,7 @@ Automated document ingestion pipeline that converts PDF and DOCX to Markdown, wi
 ## Quick Start
 
 Clone the repo, copy .env.example to .env, run docker compose up -d
-Then import n8n/flows/document_ingestion_v1.json into n8n.
+Then import a flow from n8n/flows/ into n8n: document_ingestion_v1.json is the original flow and document_ingestion_v2_gate.json adds the ingestion gate. Both are sanitized: replace the `<...>` path placeholders with your own paths and link your credentials after importing.
 
 ## Author
 

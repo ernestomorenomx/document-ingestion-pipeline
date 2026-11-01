@@ -1,0 +1,607 @@
+{
+  "name": "BrainVault - Ingesta de Documentos (gate v1)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -896,
+        96
+      ],
+      "id": "0d3772f7-d590-40ee-8a50-53d12ed6e5eb",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT hash_sha256, status, content_md FROM document;",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -64,
+        96
+      ],
+      "id": "5894c9b7-5e22-4cde-9c49-fee548b11a0b",
+      "name": "Execute a SQL query",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "<CREDENTIAL_ID>",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c832590f-4e3d-4a20-a826-1372139a8114",
+              "leftValue": "={{ $json.is_new }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        96
+      ],
+      "id": "c979920a-f6d9-4a22-95ac-461c7f99a9df",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "=sha256sum '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $json.fileName }}'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        96
+      ],
+      "id": "31d7b358-f049-44f4-8024-3d04ee7a9b94",
+      "name": "Execute a command",
+      "credentials": {
+        "sshPassword": {
+          "id": "<CREDENTIAL_ID>",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nconst items = $input.all();\n\nfor (let i = 0; i < items.length; i++) {\n  const stdout = items[i].json.stdout;\n  const match = stdout.trim().match(/^(\\S+)\\s+(.+)$/);\n  const hash = match[1];\n  const fullPath = match[2];\n  const filename = fullPath.split('/').pop();\n\n  if (filename.endsWith('.procesando') || filename.startsWith('.')) continue;\n\n  results.push({\n    json: {\n      filename: filename,\n      hash_sha256: hash,\n      raw_path: '/raw/2026/' + filename\n    },\n    pairedItem: i\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        96
+      ],
+      "id": "0d8f566d-5dbd-4f68-89b0-209f60205dbd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Nota: existingDocs es data de referencia (todos los hashes ya conocidos en la BD),\n// no está pareada item-a-item con 'documents'. documents SI define el output 1:1.\nconst existingDocs = $input.all().map(item => ({\n  hash: item.json.hash_sha256,\n  status: item.json.status,\n  content_md: item.json.content_md\n}));\n\nconst documents = $('Code in JavaScript').all();\nconst results = [];\n\nfor (let i = 0; i < documents.length; i++) {\n  const doc = documents[i];\n  const existing = existingDocs.find(e => e.hash === doc.json.hash_sha256);\n\n  const needsProcessing = !existing ||\n                          existing.status === 'pending' ||\n                          !existing.content_md;\n\n  results.push({\n    json: {\n      ...doc.json,\n      is_new: needsProcessing\n    },\n    pairedItem: i\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        96
+      ],
+      "id": "198769ad-7078-4017-8e22-ec096c852379",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://markitdown-api:8490/process_file",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1376,
+        0
+      ],
+      "id": "742d6284-24f9-4466-938e-8535818f7cd9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ '<CONTAINER_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/' + $('Edit Fields').item.json.filename }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "71c7a1ee-ce56-48e6-8c6a-714d0485a911",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d7cbd9e1-1474-4209-acd1-12728e6bb183",
+              "name": "hash_sha256",
+              "value": "={{ $json.hash_sha256 }}",
+              "type": "string"
+            },
+            {
+              "id": "13ef3957-1041-4747-a5b1-0b5a6f1a116c",
+              "name": "filename",
+              "value": "={{ $json.filename }}",
+              "type": "string"
+            },
+            {
+              "id": "0c50ec7f-1c12-4d84-8aab-fece9ec4346b",
+              "name": "raw_path",
+              "value": "={{ $json.raw_path }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        0
+      ],
+      "id": "b2e5f1a8-eacb-42ce-a0ac-99997c08e17d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document (hash_sha256, original_name, mime_type, raw_path, content_md, status, version_lock, ocr_engine)\nVALUES ($1, $2, $3, $4, $5, 'ready', 0, $6)\nON CONFLICT (hash_sha256) DO UPDATE\nSET content_md = EXCLUDED.content_md,\n    status = 'ready',\n    version_lock = document.version_lock + 1,\n    updated_at = now(),\n    ocr_engine = EXCLUDED.ocr_engine\nRETURNING original_name, content_md;",
+        "options": {
+          "queryReplacement": "={{ [$('Edit Fields').item.json.hash_sha256, $('Edit Fields').item.json.filename, $('Edit Fields').item.json.filename.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream', $('Edit Fields').item.json.raw_path, $json.markdown, $json.ocr_engine ?? 'markitdown'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2320,
+        240
+      ],
+      "id": "cd078e05-49e1-4fb4-a8e3-2501dc8d88b2",
+      "name": "Execute a SQL query1",
+      "credentials": {
+        "postgres": {
+          "id": "<CREDENTIAL_ID>",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "89783906-55f9-4da6-824b-536a13084f27",
+              "leftValue": "={{ ($json.markdown || '').length }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1616,
+        0
+      ],
+      "id": "9ca90355-d9dc-4ae1-beff-a5e5ad2c0375",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "command": "=/usr/local/bin/brainvault-ocr.sh '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $('Edit Fields').item.json.filename }}'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1856,
+        -112
+      ],
+      "id": "94f01e09-15ba-4d38-8b7f-d262c12efec8",
+      "name": "Execute a command1",
+      "credentials": {
+        "sshPassword": {
+          "id": "<CREDENTIAL_ID>",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nconst items = $input.all();\n\nfor (let i = 0; i < items.length; i++) {\n  const ocrText = items[i].json.stdout || '';\n  const editFields = $('Edit Fields').itemMatching(i);\n\n  results.push({\n    json: {\n      ...editFields.json,\n      markdown: ocrText,\n      ocr_engine: 'tesseract'\n    },\n    pairedItem: i\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        -64
+      ],
+      "id": "a45d2243-9f93-4bf2-a610-d5d57f2e5409",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nconst items = $input.all();\n\nfor (let i = 0; i < items.length; i++) {\n  const markdown = items[i].json.content_md || '';\n  const originalFilename = items[i].json.original_name;\n  const filename = originalFilename.replace(/\\.[^.]+$/, '.md');\n\n  results.push({\n    json: { filename, original_filename: originalFilename },\n    binary: {\n      data: await this.helpers.prepareBinaryData(\n        Buffer.from(markdown, 'utf-8'),\n        filename,\n        'text/markdown'\n      )\n    },\n    pairedItem: i\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        240
+      ],
+      "id": "9a4af8e7-dc9d-475f-8916-538848eda956",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=<CONTAINER_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_procesados/{{ $json.filename }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        2736,
+        240
+      ],
+      "id": "81b1bf1e-e3da-4cb7-b1b0-80d8a648e18a",
+      "name": "Read/Write Files from Disk2"
+    },
+    {
+      "parameters": {
+        "command": "=mv '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $('Code in JavaScript3').item.json.original_filename }}' '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_archivo/{{ $('Code in JavaScript3').item.json.original_filename }}' && rm -f '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $('Code in JavaScript3').item.json.original_filename }}.procesando'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2944,
+        240
+      ],
+      "id": "72114e7c-abbe-40b2-9ac3-deadf8df4d13",
+      "name": "Execute a command2",
+      "credentials": {
+        "sshPassword": {
+          "id": "<CREDENTIAL_ID>",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=touch '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada/{{ $json.filename }}.procesando'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "2f69de7e-250b-429f-9229-32d684a9d07c",
+      "name": "Marcar como procesando",
+      "credentials": {
+        "sshPassword": {
+          "id": "<CREDENTIAL_ID>",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=LC_ALL=C.UTF-8 find '<HOST_VAULT_ROOT>/<VAULT_NAME>/90_INGESTA/_entrada' -maxdepth 1 -type f ! -name '*[[:cntrl:]]*' -printf '%f\\t%s\\t%T@\\t%C@\\n'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        96
+      ],
+      "id": "931027e7-fe44-4d92-8de2-90d7055a2ed5",
+      "name": "List input files",
+      "credentials": {
+        "sshPassword": {
+          "id": "<CREDENTIAL_ID>",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "id": "f2e186cf-9f7f-4ca1-a60f-f8c5e3e11791",
+      "name": "Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -688,
+        96
+      ],
+      "parameters": {
+        "jsCode": "'use strict';\n// Ingestion Gate v1 (DN-004). Pure metadata decisions, no filesystem access.\n// Input: output of `find <input_dir> -maxdepth 1 -type f -printf '%f\\t%s\\t%T@\\t%C@\\n'`\n\nconst CONFIG = {\n  allowedExtensions: ['pdf', 'docx', 'epub'],\n  tempExtensions: ['tmp', 'part', 'crdownload', 'download'],\n  stabilityWindowSeconds: 60,\n};\n\nfunction extensionOf(name) {\n  const i = name.lastIndexOf('.');\n  return i > 0 ? name.slice(i + 1).toLowerCase() : '';\n}\n\nfunction decide(file, nowSec, cfg) {\n  const name = file.name;\n  const ext = extensionOf(name);\n  if (name.startsWith('.')) return 'HIDDEN';\n  if (/['\\\\\\x00-\\x1f\\x7f]/.test(name)) return 'UNSAFE_NAME';\n  if (name.startsWith('~$')) return 'OFFICE_LOCK';\n  if (name.endsWith('.procesando')) return 'MARKER';\n  if (cfg.tempExtensions.includes(ext)) return 'TEMP_EXT';\n  if (file.size === 0) return 'EMPTY';\n  if (!cfg.allowedExtensions.includes(ext)) return 'UNSUPPORTED_EXT';\n  const age = nowSec - Math.max(file.mtime, file.ctime);\n  if (!(age >= cfg.stabilityWindowSeconds)) return 'UNSTABLE';\n  return null;\n}\n\nfunction parseListing(text) {\n  return String(text || '')\n    .split('\\n')\n    .filter((l) => l.trim() !== '')\n    .map((line) => {\n      const [name, size, mtime, ctime] = line.split('\\t');\n      return { name, size: Number(size), mtime: Number(mtime), ctime: Number(ctime) };\n    });\n}\n\nfunction evaluate(files, nowSec, cfg = CONFIG) {\n  const accepted = [];\n  const rejected = [];\n  for (const f of files) {\n    const reason = decide(f, nowSec, cfg);\n    if (reason) rejected.push({ name: f.name, reason });\n    else accepted.push(f);\n  }\n  return { accepted, rejected };\n}\n\nif (typeof module !== 'undefined') {\n  module.exports = { CONFIG, evaluate, parseListing, extensionOf };\n}\n\n// n8n Code node entry (Run Once for All Items). Skipped when run under Node.\nif (typeof $input !== 'undefined') {\n  const text = $input.first().json.stdout ?? '';\n  const { accepted, rejected } = evaluate(parseListing(text), Date.now() / 1000);\n  const counts = {};\n  for (const r of rejected) counts[r.reason] = (counts[r.reason] || 0) + 1;\n  console.log(`gate: accepted=${accepted.length} rejected=${JSON.stringify(counts)}`);\n  return accepted.map((f) => ({ json: { fileName: f.name } }));\n}\n"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "List input files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Marcar como procesando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Execute a command1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk2": {
+      "main": [
+        [
+          {
+            "node": "Execute a command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar como procesando": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List input files": {
+      "main": [
+        [
+          {
+            "node": "Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate": {
+      "main": [
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
