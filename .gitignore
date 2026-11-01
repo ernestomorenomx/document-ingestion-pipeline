@@ -29,7 +29,7 @@ Thumbs.db
 id_rsa*
 
 # Vault and real documents (never in Git)
-BRAIN_EMT/
+# The vault folder name is excluded locally through .git/info/exclude (not published)
 90_INGESTA/
 *.pdf
 *.docx
