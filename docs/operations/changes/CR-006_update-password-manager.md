@@ -1,0 +1,10 @@
+# CR-006: Password manager updated from 1.36.0 to 1.37.3
+
+- Date: 2026-10-31
+- Findings addressed: none registered. The browser extension (2026.10.1) failed at login with a key-derivation error because the server was older than the minimum version the upstream release notes require for clients 2026.8.0 and later.
+- Approved by: owner, in the working session (no pull request or issue link yet)
+- Backup taken (required): Archives of the manager's data made with the backup script before the change, one of them seconds before the cutover with the container stopped, a full copy of the data folder kept for rollback, and an earlier archive copied to the laptop with a matching checksum. The previous image stayed on disk.
+- Change: Pulled the 1.37.3 image, stopped the running container and renamed it, disabled its restart, and started a new container from the 1.37.3 image pinned by tag and digest with the same network, loopback-only port, data folder, restart policy and variables. As before, the settings file in the data folder takes precedence over the variables.
+- Rollback: Stop the new container, restore the data folder from the pre-cutover copy, rename the old container back, set its restart policy to always and start it. The data folder has to be restored because a newer version may migrate the database on startup. Not used.
+- Verification (required): The new container reported healthy on the pinned image, its liveness endpoint answered HTTP 200, the log showed no errors in its last lines, and its version output read 1.37.3. The owner reports that the browser extension, a web page of the manager and the phone app log in and show the stored items; the phone needed its private-network connection active.
+- Residual risk: The old container stays stopped until a later cleanup, and a file with the container's variables remains in the owner's home folder; both are to be removed after a week without problems and recorded as an addendum. The container was created by hand and no file in this repository describes it, so the image is pinned only in the running container. The client checks were reported by the owner, not observed.
