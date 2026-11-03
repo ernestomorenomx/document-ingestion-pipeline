@@ -9,3 +9,4 @@
 - Decision: Pin by tag and digest, as already done for the other images.
 - Change record: none yet
 - Verification (required to close): The production compose file lists each image by tag and digest and the running containers report those digests.
+- Addendum (2026-11-03): The messaging gateway container also runs from a floating tag, so each recreation from a fresh pull may bring a different version. CR-012 recreated it from the existing image ID, not from a new pull.

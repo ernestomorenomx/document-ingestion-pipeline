@@ -9,3 +9,4 @@
 - Decision: One least-privilege role per service, none with the superuser attribute, and a rotated password. It needs its own change record because both services restart.
 - Change record: none yet
 - Verification (required to close): Each service connects with its own non-superuser role, and a session query shows no role shared between services and no application using the superuser.
+- Addendum (2026-11-03): CR-012 gave the messaging gateway its own non-superuser role and moved ownership of its database to it. Still OPEN: the workflow engine and the pipeline keep using the superuser role and need their own change record.
