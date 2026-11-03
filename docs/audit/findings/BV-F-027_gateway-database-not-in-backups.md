@@ -9,3 +9,4 @@
 - Decision: none yet
 - Change record: none yet. CR-012 took a one-off copy only, which is not a scheduled backup.
 - Verification (required to close): The scheduled backup includes the gateway database, a restore test into a temporary database matches row counts, and a copy exists off the server. Decide whether the almost empty data folder needs to be included.
+- Addendum (2026-11-03): CR-013 added the gateway database to the scheduled dump (observed on a manual start of the real service). The finding stays OPEN until the 02:00 run is observed with the new script, a restore test of a scheduled gateway dump matches row counts, and a copy exists off the server in encrypted storage.
