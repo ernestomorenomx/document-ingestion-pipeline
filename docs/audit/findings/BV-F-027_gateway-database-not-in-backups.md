@@ -1,6 +1,6 @@
 # BV-F-027: The messaging gateway database is not covered by any backup
 
-- Status: OPEN
+- Status: RESOLVED
 - Priority: P1
 - Component: ops
 - Evidence (required): The scheduled backup script dumps one named database. A listing of databases showed a second one, used by the messaging gateway, that the script does not name. A one-off dump of that database taken for CR-012 was about 95 KB and restored with matching row counts, so it holds real data. The archive of the gateway data folder was 159 bytes.
@@ -15,3 +15,8 @@
 
 - Closure condition 3 met (observed): the scheduled run at 02:00 on 2026-11-05, started by the timer, dumped both databases unattended with the new script (5 tables in the main database, 37 in the gateway database). Conditions 1 and 2 were already met.
 - Still open: condition 4, an encrypted copy of a scheduled dump outside the server.
+
+## Closure (2026-11-05)
+
+- Closure condition 4 met: a scheduled dump of each database (taken at 02:00 on 2026-11-05) was copied to an encrypted disk image on the owner's laptop, and the SHA-256 of each copy matched its line in the checksum file (reported by the owner as OK for both).
+- All four conditions are met: both databases are in the scheduled backup, a restore test passed, an unattended scheduled run succeeded, and an encrypted copy exists outside the server.

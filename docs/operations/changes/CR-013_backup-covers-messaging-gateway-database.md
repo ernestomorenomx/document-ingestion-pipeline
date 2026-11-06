@@ -8,3 +8,8 @@
 - Rollback: Copy the saved script back over the installed one. No schedule or unit has to be undone. Not used.
 - Verification (required): Observed in command output: a manual start of the real service finished successfully and its journal showed one "ok" line for each database, with 5 tables in the main dump and 37 in the gateway dump; both new dump files existed with sizes of about 980 KB and 95 KB; the two checksum lines verified; the gateway dump listed 37 public tables when read back through the database container.
 - Residual risk: The next scheduled run at 02:00 has not been observed with the new script. No restore test has been done on a scheduled gateway dump (the earlier test was on the one-off dump of CR-012). The off-server copy is still a manual copy and has not yet been done for the gateway dump, which contains message data and must go to encrypted storage. Rotation keeps 14 dumps per database, so the gateway dump adds about 1.3 MB per two weeks of retention.
+
+## Addendum (2026-11-05)
+
+- Verification of the off-server copy: a scheduled dump of each database was copied into an encrypted disk image on the owner's laptop and checked against the checksum file; both checksums matched (owner-reported). The copy is outside the synced tree, so the phone does not receive it.
+- Residual risk: the offsite copy is manual, not scheduled, so it ages until it is repeated. The image password is kept in the password manager.
