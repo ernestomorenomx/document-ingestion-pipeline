@@ -10,3 +10,6 @@
 - Decision: none yet; evolve the existing table.
 - Change record: none yet.
 - Verification (required to close): rows are created and consumed during a synthetic run.
+
+## Addendum (2026-11-08)
+CR-018 gave the processing queue lease, retry and error columns and the functions that use them. It still has no producer in the workflow, so the finding stays OPEN.

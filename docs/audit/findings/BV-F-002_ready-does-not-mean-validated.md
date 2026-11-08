@@ -10,3 +10,6 @@
 - Decision: ADR-008 and the state machine (`docs/architecture/STATE_MACHINE.md`): PARTIAL, LOW_CONFIDENCE, QUARANTINE.
 - Change record: none yet.
 - Verification (required to close): a synthetic empty-extraction fixture ends in a non-ready state; link the run output.
+
+## Addendum (2026-11-08)
+CR-018 deployed the classification function and a review view in the database. One row that was marked ready with empty content was reclassified to low_confidence. The workflow does not use classification yet, so the status stays ARCHITECTURE RESOLVED / IMPLEMENTATION PENDING.

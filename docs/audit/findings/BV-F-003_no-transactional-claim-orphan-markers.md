@@ -10,3 +10,6 @@
 - Decision: claim with lease in PostgreSQL (state machine, `processing_queue`).
 - Change record: none yet.
 - Verification (required to close): run two concurrent executions against one synthetic file and show one claim and one result.
+
+## Addendum (2026-11-08)
+CR-018 deployed claim with lease in the database: idempotent enqueue, claim with SKIP LOCKED, completion fenced by lease, classified failure with backoff and quarantine, verified with a concurrent rehearsal. The workflow does not claim work through the queue yet, so the status stays ARCHITECTURE RESOLVED / IMPLEMENTATION PENDING.
