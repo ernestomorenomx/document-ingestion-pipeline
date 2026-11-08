@@ -12,3 +12,6 @@
 ## Addendum (2026-11-05)
 
 - Observed: the scheduled backup ran unattended at 02:00 against the database container as recreated in this CR and dumped both databases (5 and 37 tables), so the backup job works with the new container.
+
+## Addendum (2026-11-08)
+The rollback container for this change was removed in CR-017 after the live service was verified running and a fresh verified backup existed.

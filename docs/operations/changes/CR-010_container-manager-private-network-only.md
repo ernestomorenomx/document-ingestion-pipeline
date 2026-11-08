@@ -8,3 +8,6 @@
 - Rollback: Remove the new container, rename the old one back, set its restart policy to always and start it. This reopens the port on all interfaces, which is the previous state.
 - Verification (required): The port mapping shows only the private-network address. From another local machine a connection to the local-network address timed out, where before it succeeded, and a connection over the private network succeeded. The service answered HTTP 200 on the second attempt after start-up. Reported by the owner, not observed: login over the private network, after the account recovery in CR-011.
 - Residual risk: The container still mounts the Docker socket, so access to it equals control of the server, and it runs on a floating tag (BV-F-023). The previous container is still on disk.
+
+## Addendum (2026-11-08)
+The rollback container for this change was removed in CR-017 after the live service was verified running and a fresh verified backup existed.

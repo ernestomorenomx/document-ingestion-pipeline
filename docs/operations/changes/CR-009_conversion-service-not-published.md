@@ -8,3 +8,6 @@
 - Rollback: Remove the new container, rename the old one back, set its restart policy to always and start it. This reopens the port, which is the previous state. For the firewall rules, allow the port again.
 - Verification (required): From another local machine the port gives connection refused. From the host the service answers HTTP 200 and the workflow engine reaches it by name. A synthetic HTML file converted to the expected Markdown with HTTP 200. The 168 executions of the previous four hours were all successful and no leftover markers existed. A later check found 1008 executions in 24 hours, all successful. The old container's log since June shows requests only from the workflow engine and the container itself, plus seven from loopback and Docker gateway addresses.
 - Residual risk: Only HTML conversion was verified; PDF, OCR and audio were not (see BV-F-026). The first two start-up checks failed because the service needs more than five seconds to start; they were false negatives, so checks must retry for about a minute. The time of the first brief outage was not recorded. The previous container is still on disk and should be removed after a few days without problems.
+
+## Addendum (2026-11-08)
+The rollback container for this change was removed in CR-017 after the live service was verified running and a fresh verified backup existed.

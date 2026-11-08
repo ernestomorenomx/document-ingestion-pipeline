@@ -8,3 +8,6 @@
 - Rollback: Stop the new container, restore the data folder from the pre-cutover copy, rename the old container back, set its restart policy to always and start it. The data folder has to be restored because a newer version may migrate the database on startup. Not used.
 - Verification (required): The new container reported healthy on the pinned image, its liveness endpoint answered HTTP 200, the log showed no errors in its last lines, and its version output read 1.37.3. The owner reports that the browser extension, a web page of the manager and the phone app log in and show the stored items; the phone needed its private-network connection active.
 - Residual risk: The old container stays stopped until a later cleanup, and a file with the container's variables remains in the owner's home folder; both are to be removed after a week without problems and recorded as an addendum. The container was created by hand and no file in this repository describes it, so the image is pinned only in the running container. The client checks were reported by the owner, not observed.
+
+## Addendum (2026-11-08)
+The rollback container for this change was removed in CR-017 after the live service was verified running and a fresh verified backup existed.
